@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: main
+  cloud:
+    consul:
+      host: 121.183.228.40
+      port: 8500
+    stream:
+      bindings:
+        m-to-c:
+          producer:
+            exchange-type: direct
+          destination: m-to-c
+        c-to-m:
+          consumer:
+            exchange-type: direct
+          destination: c-to-m
+  rabbitmq:
+    addresses: localhost
+    username: admin
+    password: admin
+logging:
+  level:
+    com:
+      ccwlab:
+        main: DEBUG
+

@@ -5,7 +5,12 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 
 @OpenAPIDefinition(
@@ -21,4 +26,18 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 
+	@LoadBalanced
+	@Bean
+	public RestTemplate loadbalancedRestTemplate() {
+		return new RestTemplate();
+	}
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withSameInstancePreference()
+				.build(context);
+	}
 }

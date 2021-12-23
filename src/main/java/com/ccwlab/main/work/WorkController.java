@@ -9,20 +9,114 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.http.ResponseEntity;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 
 @RestController
 @RequestMapping("works")
 public class WorkController {
+    Logger log = LoggerFactory.getLogger(WorkController.class);
 
     @Autowired
     private MyProcessor processor;
+
+    @GetMapping("/test")
+    void test(){
+        var req = new WorkRequest();
+        req.accessToken="1";
+        req.commitId="1";
+        req.repositoryId="2";
+        req.repositoryName="repository_name";
+        req.requestedTime = Instant.now();
+        log.debug("send: " + req.toString());
+        this.processor.output().send(MessageBuilder.withPayload(req).build());
+    }
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    @GetMapping("/test2")
+    String test2(){
+        var html = this.restTemplate.getForObject("http://web:4200/", String.class);
+        log.debug("http://web/" + html);
+        return html;
+    }
+
+    @GetMapping("/test3")
+    String test3(){
+        log.debug("http://controller/" + this.restTemplate.getForObject("http://controller/actuator/health", String.class));
+        return this.restTemplate.getForObject("http://controller/actuator/health", String.class);
+    }
+
+    class WorkRequest implements Serializable {
+        @JsonProperty("requested_time")
+        Instant requestedTime;
+        String repositoryName;
+        String repositoryId;
+        String commitId;
+        String accessToken;
+
+        @Override
+        public String toString() {
+            return "WorkRequest{" +
+                    "requestedTime=" + requestedTime +
+                    ", repositoryName='" + repositoryName + '\'' +
+                    ", repositoryId='" + repositoryId + '\'' +
+                    ", commitId='" + commitId + '\'' +
+                    ", accessToken='" + accessToken + '\'' +
+                    '}';
+        }
+
+        public Instant getRequestedTime() {
+            return requestedTime;
+        }
+
+        public void setRequestedTime(Instant requestedTime) {
+            this.requestedTime = requestedTime;
+        }
+
+        public String getRepositoryName() {
+            return repositoryName;
+        }
+
+        public void setRepositoryName(String repositoryName) {
+            this.repositoryName = repositoryName;
+        }
+
+        public String getRepositoryId() {
+            return repositoryId;
+        }
+
+        public void setRepositoryId(String repositoryId) {
+            this.repositoryId = repositoryId;
+        }
+
+        public String getCommitId() {
+            return commitId;
+        }
+
+        public void setCommitId(String commitId) {
+            this.commitId = commitId;
+        }
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
+        }
+    }
 
     @PostMapping()
     @Operation(description = "Start new CI/CD work for a specific commit.", responses = {
@@ -57,12 +151,12 @@ public class WorkController {
         throw new UnsupportedOperationException();
     }
 
-    @StreamListener(MyProcessor.channel)
+    @StreamListener(MyProcessor.in)
     void onFinalReport(FinalReport report) {
         throw new UnsupportedOperationException();
     }
 
-    @StreamListener(MyProcessor.channel)
+    @StreamListener(MyProcessor.in)
     void onProgressReport(ProgressReport report) {
         throw new UnsupportedOperationException();
     }
