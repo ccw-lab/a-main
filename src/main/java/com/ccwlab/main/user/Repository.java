@@ -11,11 +11,10 @@ public class Repository {
     String visibility;
     @JsonProperty("html_url")
     String htmlUrl;
-    String id;
+    long id;
+    @JsonProperty("onwer_id")
+    long ownerId;
     boolean enabled;
-    String url;
-    @JsonProperty("active_work_list")
-    List<Work> activeWorkList;
 
     public String getName() {
         return name;
@@ -49,12 +48,20 @@ public class Repository {
         this.htmlUrl = htmlUrl;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
+    }
+
+    public long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public boolean isEnabled() {
@@ -65,11 +72,13 @@ public class Repository {
         this.enabled = enabled;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
+    public Repository(String name, String description, String visibility, String htmlUrl, long id, long ownerId, boolean enabled) {
+        this.name = name;
+        this.description = description;
+        this.visibility = visibility;
+        this.htmlUrl = htmlUrl;
+        this.id = id;
+        this.ownerId = ownerId;
+        this.enabled = enabled;
     }
 }

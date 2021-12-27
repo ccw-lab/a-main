@@ -1,20 +1,27 @@
 spring:
   application:
     name: main
+  datasource:
+    hikari:
+      maximum-pool-size: 4
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: example
+    platform: postgres
   cloud:
     consul:
       host: 121.183.228.40
       port: 8500
     stream:
       bindings:
-        m-to-c:
+        commandToController-out-0:
           producer:
             exchange-type: direct
-          destination: m-to-c
-        c-to-m:
+          destination: commandToController
+        messageFromController-in-0:
           consumer:
             exchange-type: direct
-          destination: c-to-m
+          destination: reportToMain
   rabbitmq:
     addresses: localhost
     username: admin
@@ -24,4 +31,5 @@ logging:
     com:
       ccwlab:
         main: DEBUG
-
+jwt:
+  secret: secret

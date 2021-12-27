@@ -3,7 +3,27 @@ package com.ccwlab.main.user;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class User {
-    int id;
+    long id;
+
+    public User(long id, String login, String avatarUrl, String htmlUrl, String name, String company, String email) {
+        this.id = id;
+        this.login = login;
+        this.avatarUrl = avatarUrl;
+        this.htmlUrl = htmlUrl;
+        this.name = name;
+        this.company = company;
+        this.email = email;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    String login;
     @JsonProperty("avatar_url")
     String avatarUrl;
     @JsonProperty("html_url")
@@ -12,11 +32,14 @@ public class User {
     String company;
     String email;
 
-    public int getId() {
+    public User() {
+    }
+
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

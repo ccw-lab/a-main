@@ -2,42 +2,97 @@ package com.ccwlab.main.work;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Optional;
 
 public class Work {
-    int id;
     @JsonProperty("repository_id")
-    String repositoryId;
+    long repositoryId;
+    @JsonProperty("repository_name")
+    String repositoryName;
     @JsonProperty("commit_id")
     String commitId;
     @JsonProperty("commit_message")
     String commitMessage;
     @JsonProperty("started_time")
-    Optional<Instant> startedTime;
+    Instant startedTime;
     @JsonProperty("completed_time")
-    Optional<Instant> completedTime;
+    Instant completedTime;
+    @JsonProperty("stopped_time")
+    Instant stoppedTime;
     @JsonProperty("failed_time")
-    Optional<Instant> failedTime;
+    Instant failedTime;
     WorkStatus status;
-    @JsonProperty("run_script")
-    String runScript;
-    String url;
+    @JsonProperty("work_id")
+    long workId;
+    @JsonProperty("work_progress_uri")
+    String workProgressURI;
 
-    public int getId() {
-        return id;
+    public String getWorkProgressURI() {
+        return workProgressURI;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setWorkProgressURI(String workProgressURI) {
+        this.workProgressURI = workProgressURI;
     }
 
-    public String getRepositoryId() {
+    public Work() {
+    }
+
+    public Work(long repositoryId, String repositoryName, String commitId, String commitMessage, Instant startedTime, Instant completedTime, Instant stoppedTime, Instant failedTime, WorkStatus status, long workId, String workProgressURI) {
+        this.repositoryId = repositoryId;
+        this.repositoryName = repositoryName;
+        this.commitId = commitId;
+        this.commitMessage = commitMessage;
+        this.startedTime = startedTime;
+        this.completedTime = completedTime;
+        this.stoppedTime = stoppedTime;
+        this.failedTime = failedTime;
+        this.status = status;
+        this.workId = workId;
+        this.workProgressURI = workProgressURI;
+    }
+
+    @Override
+    public String toString() {
+        return "Work{" +
+                "repositoryId=" + repositoryId +
+                ", repositoryName='" + repositoryName + '\'' +
+                ", commitId='" + commitId + '\'' +
+                ", commitMessage='" + commitMessage + '\'' +
+                ", startedTime=" + startedTime +
+                ", completedTime=" + completedTime +
+                ", stoppedTime=" + stoppedTime +
+                ", failedTime=" + failedTime +
+                ", status=" + status +
+                ", workId=" + workId +
+                ", workProgressURI='" + workProgressURI + '\'' +
+                '}';
+    }
+
+    public Instant getStoppedTime() {
+        return stoppedTime;
+    }
+
+    public void setStoppedTime(Instant stoppedTime) {
+        this.stoppedTime = stoppedTime;
+    }
+
+    public long getRepositoryId() {
         return repositoryId;
     }
 
-    public void setRepositoryId(String repositoryId) {
+    public void setRepositoryId(long repositoryId) {
         this.repositoryId = repositoryId;
+    }
+
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
+    public void setRepositoryName(String repositoryName) {
+        this.repositoryName = repositoryName;
     }
 
     public String getCommitId() {
@@ -56,27 +111,27 @@ public class Work {
         this.commitMessage = commitMessage;
     }
 
-    public Optional<Instant> getStartedTime() {
+    public Instant getStartedTime() {
         return startedTime;
     }
 
-    public void setStartedTime(Optional<Instant> startedTime) {
+    public void setStartedTime(Instant startedTime) {
         this.startedTime = startedTime;
     }
 
-    public Optional<Instant> getCompletedTime() {
+    public Instant getCompletedTime() {
         return completedTime;
     }
 
-    public void setCompletedTime(Optional<Instant> completedTime) {
+    public void setCompletedTime(Instant completedTime) {
         this.completedTime = completedTime;
     }
 
-    public Optional<Instant> getFailedTime() {
+    public Instant getFailedTime() {
         return failedTime;
     }
 
-    public void setFailedTime(Optional<Instant> failedTime) {
+    public void setFailedTime(Instant failedTime) {
         this.failedTime = failedTime;
     }
 
@@ -88,25 +143,16 @@ public class Work {
         this.status = status;
     }
 
-    public String getRunScript() {
-        return runScript;
+    public long getWorkId() {
+        return workId;
     }
 
-    public void setRunScript(String runScript) {
-        this.runScript = runScript;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
+    public void setWorkId(long workId) {
+        this.workId = workId;
     }
 }
 enum WorkStatus{
     STARTED,
-    STOPPED,
     FAILED,
     COMPLETED
 }
