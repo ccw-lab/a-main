@@ -11,6 +11,7 @@ import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,8 @@ public class WorkController {
 
     Logger logger = LoggerFactory.getLogger(WorkController.class);
 
+    @Autowired
+    private CircuitBreakerFactory cbFactory;
 
     @PostMapping()
     @Operation(description = "Start new CI/CD work for a specific commit.", responses = {
@@ -81,7 +84,14 @@ public class WorkController {
             var commit = repo.getCommit(requestCommitId);
             var req = new WorkRequest(Instant.now(), repo.getName(), repo.getId(), commit.getSHA1(), accessToken);
             logger.debug("req: " + req.toString());
-            var entity = this.restTemplate.postForEntity("http://controller/works", req, Long.class);
+
+            var entity = cbFactory.create("request to controller").run(() ->
+                            this.restTemplate.postForEntity("http://controller/works", req, Long.class)
+                    , ex -> null);
+            if(entity == null){
+                logger.debug("Controller service is too slow now. Return 503;");
+                return ResponseEntity.status(503).build();
+            }
             if(entity.getStatusCode() == HttpStatus.ACCEPTED) {
                 var workId = entity.getBody();
                 var work = new Work(repo.getId(), repo.getName(), requestCommitId, commit.getCommitShortInfo().getMessage(), Instant.now(), null, null, null, WorkStatus.STARTED, workId

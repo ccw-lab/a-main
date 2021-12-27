@@ -39,9 +39,9 @@ public class UserController {
     GithubUtil githubUtil;
 
     @GetMapping("")
-    @Operation(description="Get user information of myself.")
-    @ApiResponse(responseCode = "200", description = "A status has been updated successfully.")
-    @ApiResponse(responseCode = "404", description = "Requested user information was not found.")
+    @Operation(description="Get the information of myself.")
+    @ApiResponse(responseCode = "200", description = "Get operation is successful.")
+    @ApiResponse(responseCode = "500", description = "A access token or this server is wrong.")
     ResponseEntity<User> getMyself(@RequestHeader("Authorization") String header){
         var accessToken = jwtUtil.getDecodedJwt(header).getClaim("t").asString();
         try {
@@ -56,10 +56,10 @@ public class UserController {
     }
 
     @GetMapping("/{login}")
-    @Operation(description="Get user information of a user id.")
-    @ApiResponse(responseCode = "200", description = "A status has been updated successfully.")
-    @ApiResponse(responseCode = "404", description = "Requested user information was not found.")
-    ResponseEntity<User> getUser(@Parameter(description = "An id where you want to get information") @PathVariable String login, @RequestHeader("Authorization") String header){
+    @Operation(description="Get the information of a provided id.")
+    @ApiResponse(responseCode = "200", description = "Get operation is successful.")
+    @ApiResponse(responseCode = "500", description = "A access token or this server is wrong.")
+    ResponseEntity<User> getUser(@Parameter(description = "An login which you want to get information of") @PathVariable String login, @RequestHeader("Authorization") String header){
         var accessToken = jwtUtil.getDecodedJwt(header).getClaim("t").asString();
         var github = this.githubUtil.get(accessToken);
         try {
@@ -76,13 +76,22 @@ public class UserController {
     @GetMapping("/{login}/repositories")
     @Operation(description="Get a list of user's repositories.")
     @ApiResponse(responseCode = "200", description = "A requested list")
-    ResponseEntity<List<Repository>> getRepositories(@PathVariable String login, @RequestHeader("Authorization") String header){
+    @ApiResponse(responseCode = "401", description = "It seems a illegal access.")
+    @ApiResponse(responseCode = "500", description = "something is wrong.")
+    ResponseEntity<List<Repository>> getRepositories(
+            @Parameter(description = "An login which you want to get information of")
+            @PathVariable String login, @RequestHeader("Authorization") String header){
         var accessToken = jwtUtil.getDecodedJwt(header).getClaim("t").asString();
         var github = this.githubUtil.get(accessToken);
         try {
             var currentLogin = github.getMyself().getLogin();
             if(github.getMyself().getLogin().equals(login)) {
-                var repos = github.getMyself().getAllRepositories().entrySet().stream().map(e -> e.getValue());
+                var repos = github
+                        .getMyself()
+                        .getAllRepositories()
+                        .entrySet()
+                        .stream()
+                        .map(e -> e.getValue());
                 var enabledList = this.repositoryMapper.select(github.getMyself().getId());
                 var result = repos.map(repo -> {
                     var enabled = Arrays.stream(enabledList).filter(item -> item.getId() == repo.getId()).findFirst().map(e -> e.isEnabled()).orElseGet(() -> false);
@@ -109,9 +118,13 @@ public class UserController {
     @RequestMapping(value = "/{login}/repositories/{repositoryName}", method={RequestMethod.PUT, RequestMethod.POST})
     @Operation(description="Enable or disable CI/CD on this repository.")
     @ApiResponse(responseCode = "200", description = "This repository has been updated successfully.")
+    @ApiResponse(responseCode = "401", description = "It seems a illegal access.")
+    @ApiResponse(responseCode = "500", description = "something is wrong.")
     ResponseEntity<Repository> getRepositories(@Parameter(description = "object containing whether CI/CD is enabled") @RequestBody UpdateRepository updateRepository,
-                                @PathVariable String login,
-                                @PathVariable String repositoryName
+                                               @Parameter(description = "An login which you update the repository with")
+                                                @PathVariable String login,
+                                               @Parameter(description = "A repository name which you update the repository with")
+                                                @PathVariable String repositoryName
             , @RequestHeader("Authorization") String header) {
         var accessToken = jwtUtil.getDecodedJwt(header).getClaim("t").asString();
         var github = this.githubUtil.get(accessToken);
@@ -138,10 +151,13 @@ public class UserController {
     }
 
     @GetMapping("/{login}/repositories/{repositoryName}/branches")
-    @Operation(description="Enable or disable CI/CD on this repository.")
+    @Operation(description="Get a list of branches.")
     @ApiResponse(responseCode = "200", description = "This repository has been updated successfully.")
-    ResponseEntity<List<Branch>> getBranches(@Parameter(description = "object containing whether CI/CD is enabled")
+    @ApiResponse(responseCode = "401", description = "It seems a illegal access.")
+    @ApiResponse(responseCode = "500", description = "something is wrong.")
+    ResponseEntity<List<Branch>> getBranches(@Parameter(description = "An login which you get branches with")
                                                 @PathVariable String login,
+                                             @Parameter(description = "A repository name which you get branches with")
                                                 @PathVariable String repositoryName
             , @RequestHeader("Authorization") String header) {
         var accessToken = jwtUtil.getDecodedJwt(header).getClaim("t").asString();

@@ -4,6 +4,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.ccwlab.main.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
@@ -24,7 +27,11 @@ public class AuthController {
     JwtUtil jwtUtil;
 
     @PostMapping("login")
-    ResponseEntity login(@RequestBody Token tokenAndFireId){
+    @Operation(description="Get JWT if a provided token is valid.")
+    @ApiResponse(responseCode = "200", description = "return with JWT")
+    @ApiResponse(responseCode = "500", description = "something is wrong.")
+    ResponseEntity login(@Parameter(description = "A token and firebase id which you sign in with")
+            @RequestBody Token tokenAndFireId){
         var accessToken= tokenAndFireId.token;
         log.debug(tokenAndFireId.toString());
         try {
@@ -52,15 +59,12 @@ class Token{
     public String getToken() {
         return token;
     }
-
     public void setToken(String token) {
         this.token = token;
     }
-
     public String getFireId() {
         return fireId;
     }
-
     public void setFireId(String fireId) {
         this.fireId = fireId;
     }
